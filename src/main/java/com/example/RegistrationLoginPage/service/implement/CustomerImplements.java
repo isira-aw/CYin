@@ -3,7 +3,6 @@ package com.example.RegistrationLoginPage.service.implement;
 import com.example.RegistrationLoginPage.dto.CustomerDTO;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.repository.CustomerRepository;
-import com.example.RegistrationLoginPage.response.LoginResponse;
 import com.example.RegistrationLoginPage.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
