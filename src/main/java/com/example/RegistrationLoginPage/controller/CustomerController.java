@@ -1,12 +1,9 @@
 package com.example.RegistrationLoginPage.controller;
 
 import com.example.RegistrationLoginPage.dto.CustomerDTO;
-import com.example.RegistrationLoginPage.dto.LoginDTO;
 import com.example.RegistrationLoginPage.entity.Customer;
-import com.example.RegistrationLoginPage.response.LoginResponse;
 import com.example.RegistrationLoginPage.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
