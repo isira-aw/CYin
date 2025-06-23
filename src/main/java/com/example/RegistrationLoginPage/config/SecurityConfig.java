@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp").permitAll()
+                .antMatchers("/api/auth/**", "/customers/signUp","/api/report","/customers/customers").permitAll() //if need to add check , path remove from this
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

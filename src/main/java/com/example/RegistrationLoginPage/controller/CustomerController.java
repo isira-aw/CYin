@@ -22,11 +22,6 @@ public class CustomerController {
         return customerService.addEmployee(customerDTO);
     }
 
-//    @PostMapping(path = "/signIn")
-//    public ResponseEntity<?> loginEmployee(@RequestBody LoginDTO loginDTO) {
-//        LoginResponse loginResponse = customerService.loginEmployee(loginDTO);
-//        return ResponseEntity.ok(loginResponse);
-//    }
 
     @GetMapping(path = "/customers")
     public List<Customer> getAllUsers() {

@@ -1,7 +1,5 @@
 package com.example.RegistrationLoginPage.config;
 
-
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
