@@ -7,6 +7,7 @@ import com.example.RegistrationLoginPage.entity.Work;
 import com.example.RegistrationLoginPage.repository.CustomerRepository;
 import com.example.RegistrationLoginPage.repository.EventRepository;
 import com.example.RegistrationLoginPage.repository.WorkRepository;
+import com.example.RegistrationLoginPage.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,13 @@ public class ReportController {
         response.setActivities(activityLogs);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Autowired
+    private CustomerService customerService;
+
+    @GetMapping(path = "/customers")
+    public List<Customer> getAllUsers() {
+        return (List<Customer>) customerService.getAllEmployee();
     }
 }
