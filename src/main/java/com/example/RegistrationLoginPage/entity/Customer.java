@@ -9,7 +9,7 @@ public class Customer {
     @Id
     @Column(name = "id", length = 50)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int Id;
+    private int id;
     @Column(name = "customer_name", length = 255)
     private String customerName;
     @Column(name = "email", length = 255)
@@ -21,7 +21,7 @@ public class Customer {
     private String password;
 
     public Customer(int Id, String customerName, String email, String role, String password) {
-        this.Id = Id;
+        this.id = id;
         this.customerName = customerName;
         this.email = email;
         this.role = role;
@@ -32,11 +32,11 @@ public class Customer {
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
 
     public void setId(int id) {
-        this.Id = id;
+        this.id = id;
     }
 
     public String getCustomerName() {
