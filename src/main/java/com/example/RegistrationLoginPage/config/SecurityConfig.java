@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp",  "/api/report/**").permitAll()
+                .antMatchers("/api/auth/**", "/api/report/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -12,8 +12,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "yourSecretKey";
-    private final long jwtExpirationMs = 86400000; // 24h
+    private final String jwtSecret = "830583058305";
+    private final long jwtExpirationMs = 86400000;
 
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();

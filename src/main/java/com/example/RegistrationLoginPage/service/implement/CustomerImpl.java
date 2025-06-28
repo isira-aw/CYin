@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CustomerImplements implements CustomerService {
+public class CustomerImpl implements CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
