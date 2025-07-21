@@ -46,6 +46,7 @@ public class ReportController {
         UserReportResponse response = new UserReportResponse();
         response.setCustomerName(customer.getCustomerName());
         response.setRole(customer.getRole());
+        response.setReportDate(date);
         response.setDescription(work.map(Work::getDescription).orElse("No work logged"));
 
         List<UserReportResponse.ActivityLog> activityLogs = events.stream()
