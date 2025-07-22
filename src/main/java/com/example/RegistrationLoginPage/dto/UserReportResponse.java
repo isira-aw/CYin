@@ -1,5 +1,6 @@
 package com.example.RegistrationLoginPage.dto;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -7,7 +8,16 @@ public class UserReportResponse {
     private String customerName;
     private String role;
     private String description;
+    private LocalDate reportDate;
     private List<ActivityLog> activities;
+
+    public LocalDate getReportDate() {
+        return reportDate;
+    }
+
+    public void setReportDate(LocalDate reportDate) {
+        this.reportDate = reportDate;
+    }
 
     public static class ActivityLog {
         private LocalTime time;
