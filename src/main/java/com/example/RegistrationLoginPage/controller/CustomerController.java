@@ -1,5 +1,6 @@
 package com.example.RegistrationLoginPage.controller;
 
+import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
 import com.example.RegistrationLoginPage.dto.CustomerDTO;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.service.CustomerService;
@@ -20,17 +21,20 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping(path = "/signUp")
-    public String saveEmployee(@RequestBody CustomerDTO customerDTO) {
-        return customerService.addEmployee(customerDTO);
+    public ResponseEntity<CommonResponseDTO> saveEmployee(@RequestBody CustomerDTO customerDTO) {
+        String result = customerService.addEmployee(customerDTO);
+
+        CommonResponseDTO response = new CommonResponseDTO();
+        if (result.contains("successful")) {
+            response.setStatus(true);
+            response.setMessage(result);
+            response.setData("Registration success");
+            return ResponseEntity.ok(response);
+        } else {
+            response.setStatus(false);
+            response.setMessage(result);
+            response.setData("Registration failed");
+            return ResponseEntity.badRequest().body(response);
+        }
     }
-
-
-//    @GetMapping(path = "/customers")
-//    public List<Customer> getAllUsers() {
-//        return (List<Customer>) customerService.getAllEmployee();
-//    }
-
-
-
-
 }

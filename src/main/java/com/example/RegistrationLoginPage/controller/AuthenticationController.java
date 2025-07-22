@@ -1,6 +1,7 @@
 package com.example.RegistrationLoginPage.controller;
 
 import com.example.RegistrationLoginPage.config.JwtTokenProvider;
+import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
 import com.example.RegistrationLoginPage.dto.LoginRequestDTO;
 import com.example.RegistrationLoginPage.dto.LoginResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class AuthenticationController {
     private JwtTokenProvider tokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<CommonResponseDTO> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -34,8 +35,13 @@ public class AuthenticationController {
 
         String jwt = tokenProvider.generateToken(authentication);
 
-        return ResponseEntity.ok(
-                new LoginResponseDTO("Login Successful", true, "USER", jwt)
-        );
+        LoginResponseDTO loginResponse = new LoginResponseDTO("Login Successful", true, "USER", jwt);
+
+        CommonResponseDTO response = new CommonResponseDTO();
+        response.setStatus(true);
+        response.setMessage("Login successful");
+        response.setData(loginResponse);
+
+        return ResponseEntity.ok(response);
     }
 }

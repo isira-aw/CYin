@@ -1,5 +1,6 @@
 package com.example.RegistrationLoginPage.controller;
 
+import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
 import com.example.RegistrationLoginPage.dto.EventRequest;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.entity.Event;
@@ -25,8 +26,12 @@ public class EventController {
     private EventRepository eventRepository;
 
     @PostMapping
-    public ResponseEntity<String> logEvent(@RequestBody EventRequest request) {
+    public ResponseEntity<CommonResponseDTO> logEvent(@RequestBody EventRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            return ResponseEntity.status(401).body(new CommonResponseDTO(false, "Authentication required", null));
+        }
+
         String email = auth.getName(); // extracted from JWT
 
         Customer customer = customerRepository.findByEmail(email)
@@ -41,6 +46,11 @@ public class EventController {
 
         eventRepository.save(event);
 
-        return ResponseEntity.ok("Event logged successfully.");
+        CommonResponseDTO response = new CommonResponseDTO();
+        response.setStatus(true);
+        response.setMessage("Event logged successfully.");
+        response.setData(request);
+
+        return ResponseEntity.ok(response);
     }
 }

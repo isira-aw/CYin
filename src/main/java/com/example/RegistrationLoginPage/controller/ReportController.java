@@ -1,5 +1,6 @@
 package com.example.RegistrationLoginPage.controller;
 
+import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
 import com.example.RegistrationLoginPage.dto.UserReportResponse;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.entity.Event;
@@ -32,10 +33,9 @@ public class ReportController {
     private EventRepository eventRepository;
 
     @GetMapping
-    public ResponseEntity<?> getUserReport(
+    public ResponseEntity<CommonResponseDTO> getUserReport(
             @RequestParam String email,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-
 
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -56,8 +56,14 @@ public class ReportController {
 
         response.setActivities(activityLogs);
 
-        return ResponseEntity.ok(response);
+        CommonResponseDTO result = new CommonResponseDTO();
+        result.setStatus(true);
+        result.setMessage("Report fetched successfully.");
+        result.setData(response);
+
+        return ResponseEntity.ok(result);
     }
+
 
     @Autowired
     private CustomerService customerService;
