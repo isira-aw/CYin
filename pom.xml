@@ -5,17 +5,16 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.14</version> <!-- Update to latest version -->
-        <relativePath/>
+        <version>3.1.1</version>
     </parent>
-
     <groupId>com.example</groupId>
     <artifactId>Registration-Login-Page</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Registration-Login-Page</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>11</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -31,10 +30,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <version>42.7.3</version> <!-- You can use a newer version if needed -->
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -57,11 +55,6 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.3</version> <!-- You can use a newer version if needed -->
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
