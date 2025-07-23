@@ -36,9 +36,9 @@ public class SecurityConfig {
                 .cors()  // Enable CORS filter
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll()
-                .anyRequest().authenticated()
+                .authorizeRequests()
+                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll() // Public endpoints
+                .anyRequest().authenticated() // Other endpoints require authentication
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

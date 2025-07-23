@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "yourSecretKey";
+    private final String jwtSecret = "yourSecretKey";  // Ensure this key is consistent in both environments
     private final long jwtExpirationMs = 86400000; // 24h
 
     public String generateToken(Authentication authentication) {
