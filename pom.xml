@@ -15,9 +15,10 @@
     <name>Registration-Login-Page</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source> <!-- or 11 -->
+        <maven.compiler.target>17</maven.compiler.target> <!-- or 11 -->
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
