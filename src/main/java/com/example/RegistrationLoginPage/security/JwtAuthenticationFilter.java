@@ -36,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             String email = jwtTokenProvider.getUsernameFromToken(token);
-
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
@@ -47,10 +46,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             );
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                } else {
+                    // Add logging for invalid token
+                    logger.error("Invalid JWT Token: {}");
                 }
             }
+        } else {
+            logger.error("Authorization header missing or incorrect.");
         }
 
         filterChain.doFilter(request, response);
     }
+
 }
