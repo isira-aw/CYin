@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -32,8 +33,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-
     @Configuration
     public class CorsConfig {
         @Bean
@@ -42,10 +41,10 @@ public class SecurityConfig {
                 @Override
                 public void addCorsMappings(CorsRegistry registry) {
                     registry.addMapping("/**")
-                            .allowedOrigins("http://localhost:5173","http://localhost:5174") // frontend origin
+                            .allowedOrigins("http://localhost:5173", "http://localhost:5174") // Add all frontend origins here
                             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                             .allowedHeaders("*")
-                            .allowCredentials(true);
+                            .allowCredentials(true);  // Ensure credentials are allowed
                 }
             };
         }
@@ -54,18 +53,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors()  // Enable CORS filter
+                .cors() // Enable CORS filter
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp",  "/api/report/**").permitAll()
+                .authorizeRequests()
+                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-
-
 }
