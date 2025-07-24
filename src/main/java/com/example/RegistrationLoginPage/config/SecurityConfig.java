@@ -25,7 +25,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -93,29 +92,12 @@ public class SecurityConfig {
                 public void addCorsMappings(CorsRegistry registry) {
                     registry.addMapping("/**")
                             .allowedOrigins("https://geny.netlify.app", "http://localhost:5173")
-                            .allowedOrigins("http://localhost:5173", "http://localhost:5174") // Add all frontend origins here
                             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                             .allowedHeaders("*")
                             .exposedHeaders("Authorization")
                             .allowCredentials(true);
-                            .allowCredentials(true);  // Ensure credentials are allowed
                 }
             };
         }
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors() // Enable CORS filter
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
     }
 }
