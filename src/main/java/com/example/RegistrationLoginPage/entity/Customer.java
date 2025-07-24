@@ -10,27 +10,33 @@ public class Customer {
     @Column(name = "id", length = 50)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
     @Column(name = "customer_name", length = 255)
     private String customerName;
+
     @Column(name = "email", length = 255)
     private String email;
+
     @Column(name = "role", length = 255)
     private String role;
 
     @Column(name = "password", length = 255)
     private String password;
 
-    public Customer(int Id, String customerName, String email, String role, String password) {
-        this.id = id;
+    // Constructor: Fix parameter name from 'Id' to 'id'
+    public Customer(int id, String customerName, String email, String role, String password) {
+        this.id = id; // Use lowercase 'id'
         this.customerName = customerName;
         this.email = email;
         this.role = role;
         this.password = password;
     }
 
+    // Default constructor
     public Customer() {
     }
 
+    // Getters and setters
     public int getId() {
         return id;
     }

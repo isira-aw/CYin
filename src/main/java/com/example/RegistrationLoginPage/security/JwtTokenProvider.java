@@ -1,4 +1,4 @@
-package com.example.RegistrationLoginPage.config;
+package com.example.RegistrationLoginPage.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -6,13 +6,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.*;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "yourSecretKey";
+    private final String jwtSecret = "yourSecretKey";  // Ensure this key is consistent in both environments
     private final long jwtExpirationMs = 86400000; // 24h
 
     public String generateToken(Authentication authentication) {
