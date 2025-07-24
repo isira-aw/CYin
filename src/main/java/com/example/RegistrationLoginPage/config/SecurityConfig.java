@@ -12,8 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -32,40 +30,18 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-
-    @Configuration
-    public class CorsConfig {
-        @Bean
-        public WebMvcConfigurer customCorsConfigurer() {
-            return new WebMvcConfigurer() {
-                @Override
-                public void addCorsMappings(CorsRegistry registry) {
-                    registry.addMapping("/**")
-                            .allowedOrigins("http://localhost:5173","http://localhost:5174") // frontend origin
-                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                            .allowedHeaders("*")
-                            .allowCredentials(true);
-                }
-            };
-        }
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors()  // Enable CORS filter
                 .and()
                 .csrf().disable()
-                .authorizeHttpRequests()
-                .antMatchers("/api/auth/**", "/customers/signUp",  "/api/report/**").permitAll()
-                .anyRequest().authenticated()
+                .authorizeRequests()
+                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll() // Public endpoints
+                .anyRequest().authenticated() // Other endpoints require authentication
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-
-
 }
