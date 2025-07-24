@@ -1,4 +1,4 @@
-package com.example.RegistrationLoginPage.config;
+package com.example.RegistrationLoginPage.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.*;
 import java.util.Date;
 
 @Component
