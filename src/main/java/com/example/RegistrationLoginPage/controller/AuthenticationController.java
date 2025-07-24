@@ -1,6 +1,6 @@
 package com.example.RegistrationLoginPage.controller;
 
-import com.example.RegistrationLoginPage.config.JwtTokenProvider;
+import com.example.RegistrationLoginPage.security.JwtTokenProvider;
 import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
 import com.example.RegistrationLoginPage.dto.LoginRequestDTO;
 import com.example.RegistrationLoginPage.dto.LoginResponseDTO;
