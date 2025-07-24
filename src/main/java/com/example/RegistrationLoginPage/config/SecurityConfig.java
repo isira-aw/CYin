@@ -58,21 +58,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())  // Enable CORS globally
-                .csrf(csrf -> csrf.disable())  // Disable CSRF (Stateless session)
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
                 .authorizeRequests(auth -> auth
-                        .antMatchers("/customers/signUp", "/api/auth/login").permitAll()  // Allow signup and login
-                        .antMatchers(HttpMethod.POST, "/api/report/**").authenticated()  // Authenticated access to report
-                        .anyRequest().authenticated()  // Any other request requires authentication
+                        .antMatchers("/customers/signUp", "/api/auth/login").permitAll()
+                        .antMatchers(HttpMethod.POST, "/api/report/**").authenticated()
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())  // Use the defined authentication provider
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);  // Add JWT filter
 
         return http.build();
     }
 
-    // Custom CORS configuration
     @Configuration
     public class CorsConfig {
         @Bean
