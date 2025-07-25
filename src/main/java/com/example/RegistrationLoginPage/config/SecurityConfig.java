@@ -24,7 +24,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -50,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsServiceImpl);  // Corrected here
+        provider.setUserDetailsService(userDetailsServiceImpl);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -58,45 +57,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(auth -> auth
-                        .antMatchers("/customers/signUp", "/api/auth/login").permitAll()
-                        .antMatchers(HttpMethod.POST, "/api/report/**").authenticated()
-                        .anyRequest().authenticated()
+                        .antMatchers("/customers/signUp", "/api/auth/login").permitAll() // Allow public access to login and signup
+                        .antMatchers(HttpMethod.POST, "/api/report/**").authenticated() // Secure report POST endpoints
+                        .anyRequest().authenticated()  // All other requests require authentication
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())  // Use the defined authentication provider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);  // Add JWT filter
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
+                .authenticationProvider(authenticationProvider()) // Use the defined authentication provider
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 
         return http.build();
     }
+    @Bean
+    public WebMvcConfigurer customCorsConfigurer() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-    @Configuration
-    public class CorsConfig {
-        @Bean
-        public WebMvcConfigurer customCorsConfigurer() {
-            CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("https://geny.netlify.app", "http://localhost:5173"));
-            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            configuration.setAllowedHeaders(List.of("*"));
-            configuration.setExposedHeaders(List.of("Authorization"));
-            configuration.setAllowCredentials(true);
+        // Set the allowed origins dynamically for all platforms (local and production)
+        configuration.setAllowedOrigins(List.of( "http://localhost:5173"));  // Add your deployed URL and localhost
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);  // Allow credentials (cookies, etc.)
 
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration globally
+        // Register the CORS configuration
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration globally
 
-            return new WebMvcConfigurer() {
-                @Override
-                public void addCorsMappings(CorsRegistry registry) {
-                    registry.addMapping("/**")
-                            .allowedOrigins("https://geny.netlify.app", "http://localhost:5173")
-                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                            .allowedHeaders("*")
-                            .exposedHeaders("Authorization")
-                            .allowCredentials(true);
-                }
-            };
-        }
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                // Add allowed origins dynamically
+                registry.addMapping("/**")
+                        .allowedOrigins( "http://localhost:5173")  // Handle both local and production
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(true);
+            }
+        };
     }
+
 }
