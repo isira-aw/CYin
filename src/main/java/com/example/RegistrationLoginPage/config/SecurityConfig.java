@@ -55,30 +55,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeRequests(auth -> auth
-                        .antMatchers("/customers/signUp", "/api/auth/login").permitAll() // Allow public access to login and signup
-                        .antMatchers(HttpMethod.POST, "/api/report/**").authenticated() // Secure report POST endpoints
-                        .anyRequest().authenticated()  // All other requests require authentication
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
-                .authenticationProvider(authenticationProvider()) // Use the defined authentication provider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+    public WebMvcConfigurer customCorsConfigurer() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-        return http.build();
-    }
+        // Set the allowed origins dynamically for all platforms (local and production)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://cyin-production.up.railway.app"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
 
-    @Bean(name = "corsConfigurerFromSecurityConfig")
-    public WebMvcConfigurer corsConfigurer() {
+        // Register the CORS configuration
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration globally
+
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                // Add allowed origins dynamically
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173", "https://cyin-production.up.railway.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
+                        .exposedHeaders("Authorization")
                         .allowCredentials(true);
             }
         };
