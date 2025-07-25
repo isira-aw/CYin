@@ -69,33 +69,22 @@ public class SecurityConfig {
 
         return http.build();
     }
-    @Bean
-    public WebMvcConfigurer customCorsConfigurer() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    @Configuration
+    public class CorsConfig {
 
-        // Set the allowed origins dynamically for all platforms (local and production)
-        configuration.setAllowedOrigins(List.of( "http://localhost:5173"));  // Add your deployed URL and localhost
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);  // Allow credentials (cookies, etc.)
-
-        // Register the CORS configuration
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration globally
-
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                // Add allowed origins dynamically
-                registry.addMapping("/**")
-                        .allowedOrigins( "http://localhost:5173")  // Handle both local and production
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .exposedHeaders("Authorization")
-                        .allowCredentials(true);
-            }
-        };
+        @Bean
+        public WebMvcConfigurer corsConfigurer() {
+            return new WebMvcConfigurer() {
+                @Override
+                public void addCorsMappings(CorsRegistry registry) {
+                    registry.addMapping("/**")
+                            .allowedOrigins("http://localhost:5173", "https://cyin-production.up.railway.app") // Add your production URL here
+                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                            .allowedHeaders("*")
+                            .allowCredentials(true);
+                }
+            };
+        }
     }
 
 }
