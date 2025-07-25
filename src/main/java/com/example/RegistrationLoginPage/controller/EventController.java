@@ -28,7 +28,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<CommonResponseDTO> logEvent(@RequestBody EventRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // extracted from JWT
+        String email = auth.getName();
 
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
