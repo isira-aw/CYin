@@ -1,29 +1,21 @@
 package com.example.RegistrationLoginPage.config;
 
 import com.example.RegistrationLoginPage.security.JwtAuthenticationFilter;
-import com.example.RegistrationLoginPage.service.implement.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -31,10 +23,6 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsServiceImpl;
-
-    // AuthenticationManager bean to authenticate users
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -45,42 +33,35 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Authentication provider setup with UserDetailsService and PasswordEncoder
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsServiceImpl);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
+    @Configuration
+    public class CorsConfig {
+        @Bean
+        public WebMvcConfigurer customCorsConfigurer() {
+            return new WebMvcConfigurer() {
+                @Override
+                public void addCorsMappings(CorsRegistry registry) {
+                    registry.addMapping("/**")
+                            .allowedOrigins("http://localhost:5173", "http://localhost:5174") // Add all frontend origins here
+                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                            .allowedHeaders("*")
+                            .allowCredentials(true);  // Ensure credentials are allowed
+                }
+            };
+        }
     }
 
     @Bean
-    public WebMvcConfigurer customCorsConfigurer() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors() // Enable CORS filter
+                .and()
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/api/auth/**", "/customers/signUp", "/api/report/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Set the allowed origins dynamically for all platforms (local and production)
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://cyin-production.up.railway.app"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
-
-        // Register the CORS configuration
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Apply CORS configuration globally
-
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                // Add allowed origins dynamically
-                registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173", "https://cyin-production.up.railway.app")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .exposedHeaders("Authorization")
-                        .allowCredentials(true);
-            }
-        };
+        return http.build();
     }
-
 }
