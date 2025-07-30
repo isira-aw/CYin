@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/event")
@@ -37,8 +39,14 @@ public class EventController {
         event.setCustomer(customer);
         event.setStatus(request.getStatus());
         event.setLocation(request.getLocation());
-        event.setDate(LocalDate.now());
-        event.setTime(LocalTime.now());
+//        event.setDate(LocalDate.now());
+//        event.setTime(LocalTime.now());
+        // Get the current date and time in Sri Lanka Standard Time (SLST)
+        ZonedDateTime sriLankaDateTime = ZonedDateTime.now(ZoneId.of("Asia/Colombo"));
+
+        // Set the date and time
+        event.setDate(sriLankaDateTime.toLocalDate());
+        event.setTime(sriLankaDateTime.toLocalTime());
 
         eventRepository.save(event);
 
