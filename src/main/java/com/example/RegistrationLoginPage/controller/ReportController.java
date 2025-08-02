@@ -78,12 +78,26 @@ public class ReportController {
     @GetMapping("/generate-report")
     public ResponseEntity<byte[]> generateUserReportPdf(
             @RequestParam String email,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
+        // If startDate or endDate is not provided, set them to today's date
+        if (startDate == null || endDate == null) {
+            LocalDate today = LocalDate.now();
+            startDate = today;
+            endDate = today;
+        }
+
+        // Validate that startDate is before or equal to endDate
+        if (startDate.isAfter(endDate)) {
+            throw new RuntimeException("End date cannot be earlier than start date.");
+        }
+
+        // Fetch the customer using the email
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Fetch works and events within the date range
         List<Work> works = workRepository.findByCustomerIdAndDateBetween(customer.getId(), startDate, endDate);
         List<Event> events = eventRepository.findByCustomerIdAndDateBetween(customer.getId(), startDate, endDate);
 
@@ -101,27 +115,35 @@ public class ReportController {
 
             // Work Table
             document.add(new Paragraph("Work Details:").setFontSize(16).setBold());
-            Table workTable = new Table(2);
-            workTable.addCell("Date");
-            workTable.addCell("Description");
-            for (Work work : works) {
-                workTable.addCell(work.getDate().toString());
-                workTable.addCell(work.getDescription());
+            if (works.isEmpty()) {
+                document.add(new Paragraph("No work logs available for this period."));
+            } else {
+                Table workTable = new Table(2);
+                workTable.addCell("Date");
+                workTable.addCell("Description");
+                for (Work work : works) {
+                    workTable.addCell(work.getDate().toString());
+                    workTable.addCell(work.getDescription());
+                }
+                document.add(workTable);
             }
-            document.add(workTable);
 
             // Event Table
             document.add(new Paragraph("Event Details:").setFontSize(16).setBold());
-            Table eventTable = new Table(3);
-            eventTable.addCell("Date");
-            eventTable.addCell("Location");
-            eventTable.addCell("Status");
-            for (Event event : events) {
-                eventTable.addCell(event.getDate().toString());
-                eventTable.addCell(event.getLocation());
-                eventTable.addCell(event.getStatus());
+            if (events.isEmpty()) {
+                document.add(new Paragraph("No events available for this period."));
+            } else {
+                Table eventTable = new Table(3);
+                eventTable.addCell("Date");
+                eventTable.addCell("Location");
+                eventTable.addCell("Status");
+                for (Event event : events) {
+                    eventTable.addCell(event.getDate().toString());
+                    eventTable.addCell(event.getLocation());
+                    eventTable.addCell(event.getStatus());
+                }
+                document.add(eventTable);
             }
-            document.add(eventTable);
 
             document.close();
         } catch (Exception e) {
@@ -132,6 +154,7 @@ public class ReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=user-report.pdf")
                 .body(byteArrayOutputStream.toByteArray());
     }
+
 
     @GetMapping(path = "/customers")
     public List<Customer> getAllUsers() {
