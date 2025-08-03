@@ -48,12 +48,12 @@
             <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext7-core</artifactId>
-            <version>7.1.16</version>
+            <version>7.1.14</version> <!-- Use a known working version -->
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
