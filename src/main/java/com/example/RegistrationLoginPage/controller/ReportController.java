@@ -11,6 +11,7 @@ import com.example.RegistrationLoginPage.repository.CustomerRepository;
 import com.example.RegistrationLoginPage.repository.EventRepository;
 import com.example.RegistrationLoginPage.repository.WorkRepository;
 import com.example.RegistrationLoginPage.service.CustomerService;
+import com.example.RegistrationLoginPage.service.GeocodingService;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -24,7 +25,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +48,9 @@ public class ReportController {
     @Autowired
     private CustomerService customerService;
 
-    // Endpoint to generate the report for a specific user in PDF format
+    @Autowired
+    private GeocodingService geocodingService;
+
     @GetMapping("/generate-report")
     public ResponseEntity<byte[]> generateUserReportPdf(
             @RequestParam String email,
@@ -85,6 +91,51 @@ public class ReportController {
             document.add(new Paragraph("Role: " + customer.getRole()).setFontSize(14));
             document.add(new Paragraph("Report Period: " + startDate + " to " + endDate).setFontSize(14));
 
+            // New Table for Date, Working Hours, OT Time, Actual Working Time
+            document.add(new Paragraph("Work Summary:").setFontSize(15).setBold());
+            Table summaryTable = new Table(4);
+            summaryTable.addCell("Date");
+            summaryTable.addCell("Working Hours");
+            summaryTable.addCell("OT Time");
+            summaryTable.addCell("Actual Working Time");
+
+            // Initialize a map to track actual working times (number of "starting working" events per day)
+            Map<LocalDate, Integer> actualWorkingTimeMap = new HashMap<>();
+
+            for (Event event : events) {
+                if ("starting working".equals(event.getStatus()) || "ending".equals(event.getStatus())) {
+                    // Parse event times
+                    LocalDate eventDate = event.getDate();
+                    LocalTime eventTime = event.getTime();  // Assume this is LocalTime
+
+                    // Convert LocalTime to LocalDateTime (use a placeholder date if necessary)
+                    LocalDateTime startDateTime = LocalDateTime.of(eventDate, eventTime);
+
+                    // Find the corresponding end time for the start event (you need to implement this logic)
+                    LocalDateTime endDateTime = getEventEndTimeForStart(event, events);
+
+                    long workingHours = 0; // Default working hours if both are not available
+                    if (endDateTime != null) {
+                        workingHours = Duration.between(startDateTime, endDateTime).toHours();
+                    }
+
+                    // Calculate OT Time (working hours minus 8 hours)
+                    long otTime = Math.max(0, workingHours - 8);
+
+                    // Track actual working time
+                    actualWorkingTimeMap.put(eventDate, actualWorkingTimeMap.getOrDefault(eventDate, 0) + 1);
+
+                    // Add a row to the summary table for the current event
+                    summaryTable.addCell(eventDate.toString());
+                    summaryTable.addCell(String.valueOf(workingHours));
+                    summaryTable.addCell(String.valueOf(otTime));
+                    summaryTable.addCell(String.valueOf(actualWorkingTimeMap.get(eventDate)));
+                }
+            }
+
+            // Add the summary table to the document
+            document.add(summaryTable);
+
             // Work Table
             document.add(new Paragraph("Work Details:").setFontSize(16).setBold());
             if (works.isEmpty()) {
@@ -112,8 +163,17 @@ public class ReportController {
                 eventTable.addCell("Time");
 
                 for (Event event : events) {
+                    // If the event location contains coordinates, replace it with the address
+                    String location = event.getLocation();
+                    if (location.contains(",")) {
+                        String[] coords = location.split(",");
+                        double latitude = Double.parseDouble(coords[0]);
+                        double longitude = Double.parseDouble(coords[1]);
+                        location = geocodingService.getAddressFromCoordinates(latitude, longitude);
+                    }
+
                     eventTable.addCell(event.getDate().toString());
-                    eventTable.addCell(event.getLocation());
+                    eventTable.addCell(location);  // Add the replaced address
                     eventTable.addCell(event.getStatus());
                     eventTable.addCell(event.getTime().toString());
                 }
@@ -135,7 +195,24 @@ public class ReportController {
                 .body(byteArrayOutputStream.toByteArray());
     }
 
-    // Endpoint to generate a report for all users in PDF format
+    /**
+     * Finds the corresponding "end working" event for a given "start working" event.
+     * @param startEvent The start working event.
+     * @param events List of all events.
+     * @return The corresponding end working event's time.
+     */
+    private LocalDateTime getEventEndTimeForStart(Event startEvent, List<Event> events) {
+        // Find the event with the same date but "ending" status after the start event
+        for (Event event : events) {
+            if ("ending".equals(event.getStatus()) && event.getDate().equals(startEvent.getDate())) {
+                return LocalDateTime.of(event.getDate(), event.getTime());
+            }
+        }
+        return null; // Return null if no corresponding end event is found
+    }
+
+
+
     @GetMapping("/generate-all-users-report")
     public ResponseEntity<byte[]> generateAllUsersReportPdf(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -205,8 +282,17 @@ public class ReportController {
                         eventTable.addCell("Time");
 
                         for (Event event : events) {
+                            // Replace coordinates with actual address if found
+                            String location = event.getLocation();
+                            if (location.contains(",")) {
+                                String[] coords = location.split(",");
+                                double latitude = Double.parseDouble(coords[0]);
+                                double longitude = Double.parseDouble(coords[1]);
+                                location = geocodingService.getAddressFromCoordinates(latitude, longitude);
+                            }
+
                             eventTable.addCell(event.getDate().toString());
-                            eventTable.addCell(event.getLocation());
+                            eventTable.addCell(location);  // Add the replaced address
                             eventTable.addCell(event.getStatus());
                             eventTable.addCell(event.getTime().toString());
                         }
