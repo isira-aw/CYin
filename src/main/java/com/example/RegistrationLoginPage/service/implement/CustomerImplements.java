@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerImplements implements CustomerService {
@@ -40,8 +41,16 @@ public class CustomerImplements implements CustomerService {
         return "Registration successful for: " + customer.getCustomerName();
     }
 
+//    @Override
+//    public List<Customer> getAllEmployee() {
+//        return customerRepository.findAll();
+//    }
+
     @Override
     public List<Customer> getAllEmployee() {
-        return customerRepository.findAll();
+        // Fetch all customers and filter out the ones with the role "ADMIN"
+        return customerRepository.findAll().stream()
+                .filter(customer -> !customer.getRole().equals("ADMIN"))
+                .collect(Collectors.toList());
     }
 }

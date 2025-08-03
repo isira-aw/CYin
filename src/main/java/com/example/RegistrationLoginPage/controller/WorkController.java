@@ -1,7 +1,7 @@
 package com.example.RegistrationLoginPage.controller;
 
 import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
-import com.example.RegistrationLoginPage.dto.WorkRequest;
+import com.example.RegistrationLoginPage.dto.WorkRequestDTO;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.entity.Work;
 import com.example.RegistrationLoginPage.repository.CustomerRepository;
@@ -25,7 +25,7 @@ public class WorkController {
     private WorkRepository workRepository;
 
     @PostMapping
-    public ResponseEntity<CommonResponseDTO> logWork(@RequestBody WorkRequest request) {
+    public ResponseEntity<CommonResponseDTO> logWork(@RequestBody WorkRequestDTO request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 

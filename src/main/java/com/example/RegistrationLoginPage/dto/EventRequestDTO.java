@@ -1,6 +1,6 @@
 package com.example.RegistrationLoginPage.dto;
 
-public class EventRequest {
+public class EventRequestDTO {
     private String status;
     private String location;
 
