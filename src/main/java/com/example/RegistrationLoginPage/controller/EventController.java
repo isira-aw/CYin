@@ -1,7 +1,7 @@
 package com.example.RegistrationLoginPage.controller;
 
 import com.example.RegistrationLoginPage.dto.CommonResponseDTO;
-import com.example.RegistrationLoginPage.dto.EventRequest;
+import com.example.RegistrationLoginPage.dto.EventRequestDTO;
 import com.example.RegistrationLoginPage.entity.Customer;
 import com.example.RegistrationLoginPage.entity.Event;
 import com.example.RegistrationLoginPage.repository.CustomerRepository;
@@ -12,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -28,7 +26,7 @@ public class EventController {
     private EventRepository eventRepository;
 
     @PostMapping
-    public ResponseEntity<CommonResponseDTO> logEvent(@RequestBody EventRequest request) {
+    public ResponseEntity<CommonResponseDTO> logEvent(@RequestBody EventRequestDTO request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 

@@ -6,7 +6,6 @@ public class CustomerDTO {
     private String employeeName;
     private String email;
     private String password;
-
     private String role;
 
     public CustomerDTO(int employeeId, String employeeName, String email, String password, String role) {
