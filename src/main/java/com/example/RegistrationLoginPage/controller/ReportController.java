@@ -44,43 +44,14 @@ public class ReportController {
     @Autowired
     private CustomerService customerService;
 
-    @GetMapping
-    public ResponseEntity<CommonResponseDTO> getUserReport(
-            @RequestParam String email,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Optional<Work> work = workRepository.findFirstByCustomerId(customer.getId());
-        List<Event> events = eventRepository.findByCustomerIdAndDate(customer.getId(), date);
-
-        UserReportResponse response = new UserReportResponse();
-        response.setCustomerName(customer.getCustomerName());
-        response.setRole(customer.getRole());
-        response.setReportDate(date);
-        response.setDescription(work.map(Work::getDescription).orElse("No work logged"));
-
-        List<UserReportResponse.ActivityLog> activityLogs = events.stream()
-                .map(e -> new UserReportResponse.ActivityLog(
-                        e.getTime(), e.getLocation(), e.getStatus()))
-                .collect(Collectors.toList());
-
-        response.setActivities(activityLogs);
-
-        CommonResponseDTO result = new CommonResponseDTO();
-        result.setStatus(true);
-        result.setMessage("Report fetched successfully.");
-        result.setData(response);
-
-        return ResponseEntity.ok(result);
-    }
-
+    // Endpoint to generate the report for a specific user in PDF format
     @GetMapping("/generate-report")
     public ResponseEntity<byte[]> generateUserReportPdf(
             @RequestParam String email,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        long startTime = System.currentTimeMillis(); // Start time measurement
 
         // If startDate or endDate is not provided, set them to today's date
         if (startDate == null || endDate == null) {
@@ -134,15 +105,19 @@ public class ReportController {
             if (events.isEmpty()) {
                 document.add(new Paragraph("No events available for this period."));
             } else {
-                Table eventTable = new Table(3);
+                Table eventTable = new Table(4); // Added an extra column for status and time
                 eventTable.addCell("Date");
                 eventTable.addCell("Location");
                 eventTable.addCell("Status");
+                eventTable.addCell("Time");
+
                 for (Event event : events) {
                     eventTable.addCell(event.getDate().toString());
                     eventTable.addCell(event.getLocation());
                     eventTable.addCell(event.getStatus());
+                    eventTable.addCell(event.getTime().toString());
                 }
+
                 document.add(eventTable);
             }
 
@@ -151,16 +126,22 @@ public class ReportController {
             e.printStackTrace();
         }
 
+        long endTime = System.currentTimeMillis(); // End time measurement
+        long duration = endTime - startTime; // Calculate time taken
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=user-report.pdf")
+                .header("X-Generation-Time", duration + "ms")  // Add custom header with generation time
                 .body(byteArrayOutputStream.toByteArray());
     }
 
-
+    // Endpoint to generate a report for all users in PDF format
     @GetMapping("/generate-all-users-report")
     public ResponseEntity<byte[]> generateAllUsersReportPdf(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        long startTime = System.currentTimeMillis(); // Start time measurement
 
         // If startDate or endDate is not provided, set them to today's date
         if (startDate == null || endDate == null) {
@@ -176,9 +157,6 @@ public class ReportController {
 
         // Fetch all customers
         List<Customer> customers = customerRepository.findAll();
-
-        // Prepare list of emails that should be included in the report
-        List<String> emailsWithData = new ArrayList<>();
 
         // Generate PDF report
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -220,15 +198,19 @@ public class ReportController {
                     if (events.isEmpty()) {
                         document.add(new Paragraph("No events available for this period."));
                     } else {
-                        Table eventTable = new Table(3);
+                        Table eventTable = new Table(4); // Added an extra column for status and time
                         eventTable.addCell("Date");
                         eventTable.addCell("Location");
                         eventTable.addCell("Status");
+                        eventTable.addCell("Time");
+
                         for (Event event : events) {
                             eventTable.addCell(event.getDate().toString());
                             eventTable.addCell(event.getLocation());
                             eventTable.addCell(event.getStatus());
+                            eventTable.addCell(event.getTime().toString());
                         }
+
                         document.add(eventTable);
                     }
 
@@ -242,14 +224,21 @@ public class ReportController {
             e.printStackTrace();
         }
 
+        long endTime = System.currentTimeMillis(); // End time measurement
+        long duration = endTime - startTime; // Calculate time taken
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=all-users-report.pdf")
+                .header("X-Generation-Time", duration + "ms")  // Add custom header with generation time
                 .body(byteArrayOutputStream.toByteArray());
     }
 
+    // Endpoint to generate a user report in JSON format
     @PostMapping("/generate-user-report-json")
     public ResponseEntity<Map<String, Object>> generateUserReportJson(
             @RequestBody UserReportRequestDTO userReportRequest) {
+
+        long startTime = System.currentTimeMillis(); // Start time measurement
 
         // Validate that startDate is before or equal to endDate
         if (userReportRequest.getStartDate().isAfter(userReportRequest.getEndDate())) {
@@ -275,15 +264,15 @@ public class ReportController {
         response.put("role", customer.getRole());
         response.put("reportPeriod", userReportRequest.getStartDate() + " to " + userReportRequest.getEndDate());
 
-        // Work details
-        List<Map<String, String>> workDetails = new ArrayList<>();
-        for (Work work : works) {
-            Map<String, String> workData = new HashMap<>();
-            workData.put("date", work.getDate().toString());
-            workData.put("description", work.getDescription());
-            workDetails.add(workData);
-        }
-        response.put("workDetails", workDetails);
+//        // Work details
+//        List<Map<String, String>> workDetails = new ArrayList<>();
+//        for (Work work : works) {
+//            Map<String, String> workData = new HashMap<>();
+//            workData.put("date", work.getDate().toString());
+//            workData.put("description", work.getDescription());
+//            workDetails.add(workData);
+//        }
+//        response.put("workDetails", workDetails);
 
         // Event details
         List<Map<String, String>> eventDetails = new ArrayList<>();
@@ -292,16 +281,25 @@ public class ReportController {
             eventData.put("date", event.getDate().toString());
             eventData.put("location", event.getLocation());
             eventData.put("status", event.getStatus());
+            eventData.put("time", event.getTime().toString());  // Added time
             eventDetails.add(eventData);
         }
         response.put("eventDetails", eventDetails);
 
+//        long endTime = System.currentTimeMillis(); // End time measurement
+//        long duration = endTime - startTime; // Calculate time taken
+//
+//        response.put("generationTime", duration + "ms"); // Include time in response
+
         return ResponseEntity.ok(response);
     }
 
+    // Endpoint to generate reports for all users in JSON format
     @PostMapping("/generate-all-users-report-json")
     public ResponseEntity<List<Map<String, Object>>> generateAllUsersReportJson(
             @RequestBody DateRangeRequest dateRangeRequest) {
+
+        long startTime = System.currentTimeMillis(); // Start time measurement
 
         // Validate that startDate is before or equal to endDate
         if (dateRangeRequest.getStartDate().isAfter(dateRangeRequest.getEndDate())) {
@@ -329,15 +327,15 @@ public class ReportController {
                 userReport.put("customerName", customer.getCustomerName());
                 userReport.put("email", customer.getEmail());
 
-                // Work details
-                List<Map<String, String>> workDetails = new ArrayList<>();
-                for (Work work : works) {
-                    Map<String, String> workData = new HashMap<>();
-                    workData.put("date", work.getDate().toString());
-                    workData.put("description", work.getDescription());
-                    workDetails.add(workData);
-                }
-                userReport.put("workDetails", workDetails);
+//                // Work details
+//                List<Map<String, String>> workDetails = new ArrayList<>();
+//                for (Work work : works) {
+//                    Map<String, String> workData = new HashMap<>();
+//                    workData.put("date", work.getDate().toString());
+//                    workData.put("description", work.getDescription());
+//                    workDetails.add(workData);
+//                }
+//                userReport.put("workDetails", workDetails);
 
                 // Event details
                 List<Map<String, String>> eventDetails = new ArrayList<>();
@@ -346,6 +344,7 @@ public class ReportController {
                     eventData.put("date", event.getDate().toString());
                     eventData.put("location", event.getLocation());
                     eventData.put("status", event.getStatus());
+                    eventData.put("time", event.getTime().toString());  // Added time
                     eventDetails.add(eventData);
                 }
                 userReport.put("eventDetails", eventDetails);
@@ -355,9 +354,14 @@ public class ReportController {
             }
         }
 
+//        long endTime = System.currentTimeMillis(); // End time measurement
+//        long duration = endTime - startTime; // Calculate time taken
+
+        // Add time taken to response
+//        allUsersReports.add(Collections.singletonMap("generationTime", duration + "ms"));
+
         return ResponseEntity.ok(allUsersReports);
     }
-
 
     @GetMapping(path = "/customers")
     public List<Customer> getAllUsers() {
