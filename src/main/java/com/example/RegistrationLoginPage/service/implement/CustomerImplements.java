@@ -41,10 +41,7 @@ public class CustomerImplements implements CustomerService {
         return "Registration successful for: " + customer.getCustomerName();
     }
 
-//    @Override
-//    public List<Customer> getAllEmployee() {
-//        return customerRepository.findAll();
-//    }
+
 
     @Override
     public List<Customer> getAllEmployee() {
